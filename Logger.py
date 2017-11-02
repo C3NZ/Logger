@@ -33,18 +33,11 @@ Items -
 '''
 
 from inspect import getframeinfo, stack
-from constants import DEBUGMODE
 from time import strftime
 from os.path import abspath, join
 
 #Class to log information to both a text file and the users console
 class Logger(object):
-    #Static class variables
-    directory = "utils/logs/"
-    fileName = "{}.txt".format(strftime("%m-%d-%Y"))
-    f = open(join(directory, fileName), "a+")
-    forceConsole = True
-
     '''
        If the console is only being called explicitly, the only
        argument that needs to be passed is a string containing the
@@ -55,6 +48,29 @@ class Logger(object):
        arg[2] = line number - what linea logger instance was called from
 
     '''
+    DEBUGMODE = True
+    directory = "logs/"
+    file_name = "{}.txt".format(strftime("%m-%d-%Y"))
+    file_object = open(join(directory, file_name), "a+")
+    forceConsole = True
+
+    @staticmethod
+    def reload_file_object(directory=None, file_name=None):
+        """
+        Reload the file object used for appending data to
+
+        Params:
+            directory = directory path as a string
+            file_name = file_name as a string
+        """
+        if directory is None and file_name is None:
+            Logger.file_object = open(join(Logger.directory, Logger.file_name), 'a+')
+        elif directory is not None and file_name is None:
+            Logger.file_object = open(join(directory, Logger.file_name), 'a+')
+        elif directory is None and file_name is not None:
+            Logger.file_object = open(join(Logger.directory, file_name), 'a+')
+        else:
+            Logger.file_object = open(join(directory, file_name), 'a+')
 
     #Write info to the console
     @staticmethod
@@ -77,7 +93,7 @@ class Logger(object):
     #Write debug info to the console
     @staticmethod
     def console_d(*args):
-        if DEBUGMODE:
+        if Logger.DEBUGMODE:
             if len(args) == 1:
                 caller = getframeinfo(stack()[1][0])
                 print("[DEBUG][{}][{}]:{}".format(caller.filename, caller.lineno, args[0]))
@@ -106,7 +122,7 @@ class Logger(object):
     @staticmethod
     def log_debug(message):
         caller = getframeinfo(stack()[1][0])
-        if DEBUGMODE:
+        if Logger.DEBUGMODE:
             if Logger.forceConsole:
                 Logger.console_d(message, caller.filename, caller.lineno)
             Logger.f.write("[DEBUG][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
