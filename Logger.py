@@ -36,7 +36,6 @@ from inspect import getframeinfo, stack
 from time import strftime
 from os.path import abspath, join
 
-#Class to log information to both a text file and the users console
 class Logger(object):
     '''
        If the console is only being called explicitly, the only
@@ -72,63 +71,138 @@ class Logger(object):
         else:
             Logger.file_object = open(join(directory, file_name), 'a+')
 
-    #Write info to the console
     @staticmethod
-    def console_i(*args):
-        if len(args) == 1:
+    def console_i(message=None,*args):
+        """
+        Output information to the console
+
+        user must always supply the message string when explicitly calling console_i.
+        args is meant for other functions to pass the frame info to the console from
+        their call when DEBUGMODE is True
+
+        Params:
+            message = Information to be printed to the console
+            *args = frame info Information passed from other Logger functions
+
+        """
+        if message is not None:
             caller = getframeinfo(stack()[1][0])
-            print("[INFO][{}][{}]:{}".format(caller.filename, caller.lineno, args[0]))
+            print("[INFO][{}][{}]:{}".format(caller.filename, caller.lineno, message))
         else:
             print("[INFO][{}][{}]:{}".format(args[2], args[1], args[0]))
 
-    #Write an error to the console
     @staticmethod
-    def console_e(*args):
-        if len(args) == 1:
+    def console_e(message=None, *args):
+        """
+        Output errors to the console
+
+        user must always supply the info string when explicitly calling console_i.
+        args is meant for other functions to pass the frame info to the console from
+        their call when DEBUGMODE is True
+
+        Params:
+            message = Information to be printed to the console
+            *args = frame info Information passed from other Logger functions
+
+        """
+        if message is not None:
             caller = getframeinfo(stack()[1][0])
-            print("[ERROR][{}][{}]:{}".format(caller.filename, caller.lineno, args[0]))
+            print("[ERROR][{}][{}]:{}".format(caller.filename, caller.lineno, message))
         else:
             print("[ERROR][{}][{}]:{}".format(args[2], args[1], args[0]))
 
-    #Write debug info to the console
     @staticmethod
-    def console_d(*args):
+    def console_d(message=None, *args):
+         """
+         Output debug information to the console, DEBUGMODE must be true in order for this
+         function to do anything
+
+         user must always supply the info string when explicitly calling console_i.
+         args is meant for other functions to pass the frame info to the console from
+         their call when DEBUGMODE is True
+
+         Params:
+            message = Information to be printed to the console
+            *args = frame info Information passed from other Logger functions
+
+        """
         if Logger.DEBUGMODE:
-            if len(args) == 1:
+            if message is not None:
                 caller = getframeinfo(stack()[1][0])
-                print("[DEBUG][{}][{}]:{}".format(caller.filename, caller.lineno, args[0]))
+                print("[DEBUG][{}][{}]:{}".format(caller.filename, caller.lineno, message))
             else:
                 print("[DEBUG][{}][{}]:{}".format(args[2], args[1], args[0]))
 
-    #append information to a log file
     @staticmethod
     def log_info(message):
+         """
+         Log information into a text file
+
+         when DEBUGMODE is set to true the function will also implicitly call 
+         console_i with the correct frame info
+
+         Params:
+            message = Information to be logged as a string
+
+        """
         caller = getframeinfo(stack()[1][0])
-        if Logger.forceConsole:
+        
+        if Logger.DEBUGMODE:
             Logger.console_i(message, caller.filename, caller.lineno)
-        Logger.f.write("[INFO][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
-                        strftime("%H:%M:%S"), caller.filename, caller.lineno, message))
+        
+        Logger.f.write(
+                        "[INFO][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
+                        strftime("%H:%M:%S"), caller.filename, caller.lineno, message)
+                      )
 
     #append error information to a log file
     @staticmethod
     def log_error(message):
-        caller = getframeinfo(stack()[1][0])
-        if Logger.forceConsole:
-            Logger.console_e(message, caller.filename, caller.lineno)
-        Logger.f.write("[ERROR][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
-                        strftime("%H:%M:%S"), caller.filename, caller.lineno, message))
+        """
+         Log errors into a text file
 
-    #append debugging information to a log file
+         when DEBUGMODE is set to true the function will also implicitly call 
+         console_i with the correct frame info
+
+         Params:
+            message = message to be logged as a string
+
+        """
+        
+        caller = getframeinfo(stack()[1][0])
+        
+        if Logger.DEBUGMODE:
+            Logger.console_e(message, caller.filename, caller.lineno)
+        
+        Logger.f.write(
+                        "[ERROR][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
+                        strftime("%H:%M:%S"), caller.filename, caller.lineno, message)
+                      )
+
     @staticmethod
     def log_debug(message):
-        caller = getframeinfo(stack()[1][0])
-        if Logger.DEBUGMODE:
-            if Logger.forceConsole:
-                Logger.console_d(message, caller.filename, caller.lineno)
-            Logger.f.write("[DEBUG][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
-                            strftime("%H:%M:%S"), caller.filename, caller.lineno, message))
+        """
+         Log debug information into a text file
 
-    #Close the logging file when it no longer needs to be accessed
+        DEBUG_MODE needs to be activated in order for debug information to be logged 
+
+         Params:
+            message = information to be logged as a string
+
+        """
+        caller = getframeinfo(stack()[1][0])
+        
+        if Logger.DEBUGMODE:
+                Logger.console_d(message, caller.filename, caller.lineno)
+        
+            Logger.f.write(
+                            "[DEBUG][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
+                            strftime("%H:%M:%S"), caller.filename, caller.lineno, message)
+                          )
+
     @staticmethod
     def close_log():
+        """
+        close out the file being used to append information to 
+        """
         Logger.f.close()
