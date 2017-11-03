@@ -17,3 +17,4 @@ if __name__ == '__main__':
 	else:
 		Logger.log_info("Numbers added up correctly!")
 
+	Logger.close_log()
