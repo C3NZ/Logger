@@ -196,4 +196,4 @@ class Logger(object):
         """
         close out the file being used to append information to 
         """
-        Logger.f.close()
+        Logger.file_object.close()
