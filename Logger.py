@@ -16,9 +16,6 @@ Items -
             string : directory - directory the log files will be written to
             string : fileName - The name of the log file
             file object : f - File object for the logger to write to
-            boolean : forceConsole - Forces log_* functions to print to the console
-                                     as well as write to a txt file.
-
 
         -Logger functions-
             RETURNTYPE : NAME - DESC
@@ -51,7 +48,6 @@ class Logger(object):
     directory = "logs/"
     file_name = "{}.txt".format(strftime("%m-%d-%Y"))
     file_object = open(join(directory, file_name), "a+")
-    forceConsole = True
 
     @staticmethod
     def reload_file_object(directory=None, file_name=None):
@@ -113,7 +109,7 @@ class Logger(object):
 
     @staticmethod
     def console_d(message=None, *args):
-         """
+        """
          Output debug information to the console, DEBUGMODE must be true in order for this
          function to do anything
 
@@ -127,6 +123,7 @@ class Logger(object):
 
         """
         if Logger.DEBUGMODE:
+            
             if message is not None:
                 caller = getframeinfo(stack()[1][0])
                 print("[DEBUG][{}][{}]:{}".format(caller.filename, caller.lineno, message))
@@ -135,7 +132,7 @@ class Logger(object):
 
     @staticmethod
     def log_info(message):
-         """
+        """
          Log information into a text file
 
          when DEBUGMODE is set to true the function will also implicitly call 
@@ -150,10 +147,8 @@ class Logger(object):
         if Logger.DEBUGMODE:
             Logger.console_i(message, caller.filename, caller.lineno)
         
-        Logger.f.write(
-                        "[INFO][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
-                        strftime("%H:%M:%S"), caller.filename, caller.lineno, message)
-                      )
+        Logger.file_object.write("[INFO][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
+                       strftime("%H:%M:%S"), caller.filename, caller.lineno, message))
 
     #append error information to a log file
     @staticmethod
@@ -174,10 +169,8 @@ class Logger(object):
         if Logger.DEBUGMODE:
             Logger.console_e(message, caller.filename, caller.lineno)
         
-        Logger.f.write(
-                        "[ERROR][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
-                        strftime("%H:%M:%S"), caller.filename, caller.lineno, message)
-                      )
+        Logger.file_object.write("[ERROR][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
+                       strftime("%H:%M:%S"), caller.filename, caller.lineno, message))
 
     @staticmethod
     def log_debug(message):
@@ -193,12 +186,10 @@ class Logger(object):
         caller = getframeinfo(stack()[1][0])
         
         if Logger.DEBUGMODE:
-                Logger.console_d(message, caller.filename, caller.lineno)
+            Logger.console_d(message, caller.filename, caller.lineno)
         
-            Logger.f.write(
-                            "[DEBUG][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
-                            strftime("%H:%M:%S"), caller.filename, caller.lineno, message)
-                          )
+            Logger.file_object.write("[DEBUG][{}][{}][{}][{}]:{}\n".format(strftime("%m-%d-%Y"),
+                            strftime("%H:%M:%S"), caller.filename, caller.lineno, message))
 
     @staticmethod
     def close_log():
